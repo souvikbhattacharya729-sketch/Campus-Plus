@@ -1,0 +1,70 @@
+
+# =========================
+# ENVIRONMENT & SECRETS
+# =========================
+.env
+.env.*
+!.env.example
+!.env.template
+
+# =========================
+# PYTHON BACKEND
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+venv/
+.venv/
+ENV/
+
+# =========================
+# NODE / FRONTEND
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Build output
+dist/
+build/
+.next/
+.nuxt/
+
+# =========================
+# EDITOR & OS
+# =========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# =========================
+# LOGS & TEMP FILES
+# =========================
+*.log
+*.tmp
+*.swp
+.cache/
+
+# =========================
+# TESTING
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/
+
+# =========================
+# DATABASE & BACKUPS
+# =========================
+*.sqlite3
+*.db
+*.bak
+
+# =========================
+# PYTHON PACKAGES
+# =========================
+*.egg-info/
+.eggs/
+wheels/

@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="web_standard" name="shell-type"/>
+  <title>CampusPulse ⚡ — Where Campus Memories Happen</title>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { display: none; }
+    .noise-bg {
+      background-image: radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(249, 115, 22, 0.08) 0%, transparent 40%);
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-glow { animation: pulse-ring 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+  </style>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: "#0f172a",
+              indigo: "#1e1b4b",
+              blue: "#2563eb",
+              blueDark: "#1d4ed8",
+              orange: "#f97316",
+              orangeLight: "#ffedd5",
+              mint: "#10b981",
+              mintLight: "#ecfdf5",
+              purple: "#8b5cf6",
+              purpleLight: "#f5f3ff",
+              surface: "#f8fafc",
+              border: "#e2e8f0"
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"Space Grotesk"', 'monospace']
+          },
+          borderRadius: {
+            '2xl': '1.25rem',
+            '3xl': '1.75rem',
+            '4xl': '2.25rem'
+          }
+        }
+      }
+    };
+  </script>
+</head>
+
+<body class="bg-[#f8fafc] text-slate-900 antialiased min-h-screen flex flex-col selection:bg-brand-orange selection:text-white noise-bg">
+
+<!-- ================= TOP NAVIGATION ================= -->
+<header class="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-sm transition-all">
+  <div class="h-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+    <!-- Brand Logo -->
+    <div class="flex items-center gap-6">
+      <a class="flex items-center gap-3 group focus:outline-none" href="#" id="brand-logo-btn">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-blue via-indigo-600 to-brand-orange flex items-center justify-center text-white shadow-md shadow-blue-500/25 group-hover:scale-105 group-hover:rotate-3 transition-transform">
+          <span class="material-symbols-outlined text-2xl font-bold">bolt</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-1">
+            CampusPulse <span class="text-brand-orange text-lg">⚡</span>
+          </span>
+          <span class="text-[11px] font-semibold text-slate-500 tracking-wide uppercase">Where campus memories happen</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Pills -->
+      <nav class="hidden md:flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/70">
+        <button class="nav-tab px-4 py-2 rounded-xl text-sm font-bold bg-white text-brand-blue shadow-sm transition-all flex items-center gap-1.5" id="nav-explore-btn" type="button">
+          <span class="material-symbols-outlined text-[18px]">explore</span>
+          <span>Explore Events</span>
+        </button>
+        <button class="nav-tab px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all flex items-center gap-1.5" id="nav-passes-btn" type="button">
+          <span class="material-symbols-outlined text-[18px]">confirmation_number</span>
+          <span>My Passes</span>
+          <span class="ml-1 px-1.5 py-0.2 bg-brand-orange/10 text-brand-orange text-[10px] font-bold rounded-full" id="my-passes-count">0</span>
+        </button>
+        <button class="nav-tab px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all flex items-center gap-1.5" id="nav-organizer-btn" type="button">
+          <span class="material-symbols-outlined text-[18px]">shield_person</span>
+          <span>Organizer Console</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Right Header Actions: Environment Switcher + User Switcher -->
+    <div class="flex items-center gap-3">
+      <!-- Live API Base URL Indicator & Switcher -->
+      <div class="hidden lg:flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-2xl border border-slate-200/80 text-xs">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Target API:</span>
+        <select id="api-base-select" class="bg-transparent font-mono font-bold text-xs text-brand-blue border-0 focus:ring-0 p-0 cursor-pointer pr-4">
+          <option value="render">🌐 Live Render (hello-world-workshop.onrender.com)</option>
+          <option value="local">⚡ Local Flask Backend (/api)</option>
+        </select>
+      </div>
+
+      <!-- Quick Notification / Contract Button -->
+      <button aria-label="Inspect API Contract" class="relative w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors" id="view-schema-btn-header" title="Inspect API Contract Schema" type="button">
+        <span class="material-symbols-outlined text-[20px]">api</span>
+      </button>
+
+      <!-- User Switcher Dropdown (Interactive) -->
+      <div class="relative" id="user-switcher-container">
+        <button class="flex items-center gap-3 p-1.5 pr-3.5 bg-slate-100 hover:bg-slate-200/90 rounded-2xl border border-slate-200/80 transition-all focus:outline-none focus:ring-2 focus:ring-brand-blue/30 group" id="user-menu-btn" type="button">
+          <div class="relative">
+            <img alt="Active User Avatar" class="w-9 h-9 rounded-xl object-cover ring-2 ring-white shadow-sm" id="active-user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"/>
+            <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-brand-mint rounded-full ring-2 ring-white" id="active-user-status"></span>
+          </div>
+          <div class="text-left hidden sm:block">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-slate-900 leading-tight" id="active-user-name">Loading...</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-blue-100 text-brand-blue uppercase" id="active-user-badge">Student</span>
+            </div>
+            <div class="text-[11px] text-slate-500 font-medium" id="active-user-handle">...</div>
+          </div>
+          <span class="material-symbols-outlined text-slate-400 group-hover:text-slate-700 text-[18px] transition-transform duration-200" id="user-chevron">expand_more</span>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200/80 p-2 z-50 max-h-[460px] overflow-y-auto" id="user-dropdown-menu">
+          <div class="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Switch Demo Persona</span>
+            <span class="text-[10px] font-semibold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full" id="persona-sync-status">Live Connected</span>
+          </div>
+          
+          <div class="py-1 space-y-1" id="user-dropdown-list">
+            <!-- Dynamically populated from /api/users -->
+            <div class="p-3 text-center text-xs text-slate-400">Fetching users from backend...</div>
+          </div>
+
+          <div class="mt-1 pt-2 border-t border-slate-100 text-center text-[10px] text-slate-400 font-mono">
+            Sends <span class="text-brand-blue font-bold">X-User-Id</span> with all API requests
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= MAIN CONTENT ================= -->
+<main class="w-full pt-20 flex-1">
+  <!-- HERO SECTION: Warm, collegiate, punchy -->
+  <section class="relative overflow-hidden bg-gradient-to-b from-blue-900 via-indigo-950 to-slate-950 text-white pt-12 pb-20 px-4 sm:px-6 lg:px-8 border-b border-indigo-900/40">
+    <div class="absolute -top-24 -left-20 w-96 h-96 bg-brand-orange/20 rounded-full blur-3xl pointer-events-none pulse-glow"></div>
+    <div class="absolute top-1/2 right-0 w-[30rem] h-[30rem] bg-brand-blue/25 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+      <!-- Live Semester Pulse Ribbon -->
+      <div class="flex flex-wrap items-center gap-3 mb-6">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-bold text-white shadow-inner">
+          <span class="w-2 h-2 rounded-full bg-brand-orange animate-ping"></span>
+          <span class="text-brand-orangeLight font-extrabold tracking-wide uppercase">Fall Semester 2026</span>
+          <span class="text-white/40">•</span>
+          <span id="hero-events-live-count">Syncing Live Events...</span>
+        </div>
+
+        <div class="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-mint/20 border border-brand-mint/30 text-brand-mintLight text-xs font-semibold" id="hero-user-status">
+          <span class="material-symbols-outlined text-[15px] text-brand-mint">check_circle</span>
+          <span id="hero-user-status-text">1-Click RSVP Ready</span>
+        </div>
+
+        <button class="ml-auto text-xs font-mono text-blue-200/80 hover:text-white flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors" id="view-schema-btn">
+          <span class="material-symbols-outlined text-[16px]">api</span>
+          <span>Inspect API Contract</span>
+        </button>
+      </div>
+
+      <!-- Big Punchy Headline -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+        <div class="lg:col-span-8">
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-white">
+            Don’t Miss Out on the <br/>
+            <span class="bg-gradient-to-r from-orange-400 via-amber-300 to-emerald-300 bg-clip-text text-transparent">Campus Action</span> Tonight.
+          </h1>
+          <p class="mt-4 text-lg text-blue-100/90 font-medium max-w-2xl leading-relaxed">
+            Real-time event discovery backed by live REST endpoints. Reserve seats with verified pass allocations in 1-click.
+          </p>
+        </div>
+
+        <!-- Quick Stat Banners -->
+        <div class="lg:col-span-4 flex items-center gap-3 bg-white/10 backdrop-blur-lg border border-white/15 rounded-3xl p-4 shadow-xl">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-orange to-amber-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-orange-500/30">
+            <span class="material-symbols-outlined text-3xl">celebration</span>
+          </div>
+          <div>
+            <div class="text-2xl font-black text-white font-mono leading-none" id="hero-stat-registrations">100% Live</div>
+            <div class="text-xs text-blue-200 font-semibold mt-1">Connected to <code class="font-mono text-white/90" id="hero-current-base-text">Render API</code></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Interactive Discovery Console -->
+      <div class="mt-10 bg-white rounded-3xl p-3 sm:p-4 shadow-2xl border border-slate-100 flex flex-col gap-3 text-slate-800">
+        <div class="flex flex-col md:flex-row gap-3 items-center">
+          <!-- Search Input -->
+          <div class="relative w-full flex-1">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-2xl">search</span>
+            <input class="w-full pl-12 pr-4 py-3.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white rounded-2xl border-0 ring-1 ring-slate-200 focus:ring-2 focus:ring-brand-blue font-medium text-slate-900 placeholder:text-slate-400 transition-all text-sm" id="event-search-input" placeholder="Search by event title, organizer or track..." type="text"/>
+          </div>
+
+          <!-- Capacity Filter -->
+          <div class="relative w-full md:w-56 shrink-0">
+            <select class="w-full pl-4 pr-10 py-3.5 bg-slate-50 hover:bg-slate-100/80 rounded-2xl border-0 ring-1 ring-slate-200 focus:ring-2 focus:ring-brand-blue font-semibold text-slate-700 text-sm cursor-pointer appearance-none" id="capacity-filter-select">
+              <option value="all">🎟 All Availability</option>
+              <option value="open">🟢 Open Spots Available</option>
+              <option value="almost-full">🔥 Almost Full (&gt;75%)</option>
+              <option value="full">⏳ Full / Waitlist</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">tune</span>
+          </div>
+
+          <!-- Refresh Button -->
+          <button class="px-4 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm flex items-center gap-1.5 transition-colors shrink-0" id="refresh-events-btn" title="Refresh Live Events" type="button">
+            <span class="material-symbols-outlined text-lg" id="refresh-icon">refresh</span>
+            <span>Refresh</span>
+          </button>
+        </div>
+
+        <!-- Quick Tag Filter Chips -->
+        <div class="flex items-center gap-2 pt-2 border-t border-slate-100 overflow-x-auto pb-1 scrollbar-none">
+          <span class="text-[11px] font-extrabold uppercase text-slate-400 tracking-wider whitespace-nowrap pl-1">Filter Track:</span>
+          <button class="category-chip active px-3.5 py-1.5 rounded-full text-xs font-bold bg-brand-blue text-white shadow-md shadow-blue-500/20 transition-all shrink-0" data-category="all">
+            ⚡ All Events
+          </button>
+          <button class="category-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all shrink-0" data-category="Tech">
+            💻 Tech & AI
+          </button>
+          <button class="category-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all shrink-0" data-category="Creative">
+            🎨 Creative & Design
+          </button>
+          <button class="category-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all shrink-0" data-category="Community">
+            👥 Community & Meetup
+          </button>
+          <button class="category-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all shrink-0" data-category="Music">
+            🎵 Music & Night
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MAIN FEED & EVENTS GRID ================= -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full" id="events-section">
+    <!-- Section subheader & real-time badge -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div class="flex items-center gap-3">
+        <h2 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+          Trending On Campus
+          <span class="w-2.5 h-2.5 rounded-full bg-brand-orange animate-ping"></span>
+        </h2>
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-200 text-slate-700" id="results-count">Loading...</span>
+      </div>
+
+      <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 bg-white border border-slate-200/80 px-3 py-1.5 rounded-xl shadow-sm">
+        <span class="material-symbols-outlined text-brand-mint text-[16px]">cloud_sync</span>
+        <span>Live endpoint: <code class="font-mono text-slate-700" id="current-endpoint-display">GET /api/events</code></span>
+      </div>
+    </div>
+
+    <!-- THE EVENT CARDS GRID (Populated Dynamically) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7" id="events-grid">
+      <!-- Loading Skeleton initially -->
+      <div class="col-span-full py-16 text-center flex flex-col items-center justify-center gap-3 text-slate-400">
+        <span class="material-symbols-outlined text-4xl animate-spin text-brand-blue">progress_activity</span>
+        <span class="text-sm font-semibold">Fetching live events from API...</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SLIDE-OUT DETAIL DRAWER ================= -->
+  <div class="fixed inset-0 z-50 pointer-events-none transition-all duration-300" id="event-drawer">
+    <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-300 pointer-events-none" id="drawer-backdrop"></div>
+    <div class="absolute right-0 top-0 bottom-0 w-full max-w-xl bg-white shadow-2xl flex flex-col translate-x-full transition-transform duration-300 ease-out pointer-events-auto" id="drawer-panel">
+      <!-- Drawer Header -->
+      <div class="p-6 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-brand-blue flex items-center justify-center text-white">
+            <span class="material-symbols-outlined text-[20px]">confirmation_number</span>
+          </div>
+          <div>
+            <span class="text-xs font-mono text-blue-300 font-bold block" id="drawer-event-id">evt_...</span>
+            <span class="text-sm font-bold text-white">Event Detail & Live Seat Allocation</span>
+          </div>
+        </div>
+        <button class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors" id="close-drawer-btn" type="button">
+          <span class="material-symbols-outlined text-[22px]">close</span>
+        </button>
+      </div>
+
+      <!-- Drawer Body (Scrollable) -->
+      <div class="p-6 overflow-y-auto flex-1 space-y-6">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-orange-100 text-brand-orange" id="drawer-category-badge">
+              Campus Event
+            </span>
+            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1" id="drawer-status-pill">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+              Live Endpoint
+            </span>
+          </div>
+          <h2 class="text-2xl font-black text-slate-900 leading-tight" id="drawer-title">
+            Loading Event...
+          </h2>
+          <p class="text-sm font-semibold text-brand-blue mt-1 flex items-center gap-1.5" id="drawer-host">
+            <span class="material-symbols-outlined text-[16px]">verified</span>
+            Hosted by Campus Organizer
+          </p>
+        </div>
+
+        <!-- Quick Event Facts Bento -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3 text-sm">
+          <div class="flex items-center gap-3 text-slate-700 font-semibold">
+            <div class="w-8 h-8 rounded-xl bg-blue-100 text-brand-blue flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+            </div>
+            <span id="drawer-datetime">Date & Time Syncing...</span>
+          </div>
+
+          <div class="flex items-center gap-3 text-slate-700 font-semibold">
+            <div class="w-8 h-8 rounded-xl bg-orange-100 text-brand-orange flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[18px]">location_on</span>
+            </div>
+            <div>
+              <span class="block" id="drawer-location">Campus Innovation Hub</span>
+              <span class="text-xs text-slate-400 font-medium">Main Auditorium / Wing B</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 text-slate-700 font-semibold">
+            <div class="w-8 h-8 rounded-xl bg-purple-100 text-brand-purple flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[18px]">badge</span>
+            </div>
+            <span>Pass verified via <code class="font-mono text-purple-700">POST /api/registrations</code></span>
+          </div>
+        </div>
+
+        <!-- Live Capacity Meter Card -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Live Seat Capacity</span>
+            <span class="font-mono font-black text-sm text-brand-blue" id="drawer-capacity-text">-- / -- Registered</span>
+          </div>
+          <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-2">
+            <div class="bg-gradient-to-r from-brand-blue to-brand-orange h-full rounded-full transition-all duration-500" id="drawer-progress" style="width: 50%"></div>
+          </div>
+          <div class="flex justify-between text-xs text-slate-500 font-medium">
+            <span class="font-semibold text-emerald-600" id="drawer-remaining-spots">-- Spots Remaining</span>
+            <span>1-Click Student RSVP active</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">About The Experience</h4>
+          <p class="text-sm font-medium text-slate-600 leading-relaxed" id="drawer-description">
+            Experience innovative campus workshops and gatherings. Pass automatically registers you in the database and reserves your place.
+          </p>
+        </div>
+
+        <!-- Organizer Roster Quick Link (Visible if current user is the organizer) -->
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 hidden" id="drawer-organizer-actions">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-amber-900 block">👑 You are the Owning Organizer</span>
+              <span class="text-[11px] text-amber-700">You have permissions to view attendee list (GET /api/events/{id}/registrations).</span>
+            </div>
+            <button class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-sm transition-colors" id="drawer-view-attendees-btn" type="button">
+              View Roster
+            </button>
+          </div>
+        </div>
+
+        <!-- API Simulator Box -->
+        <div class="bg-slate-900 rounded-2xl p-4 font-mono text-xs text-slate-300">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-2 flex items-center justify-between">
+            <span>Live Endpoint Integration</span>
+            <span class="text-emerald-400" id="drawer-api-status">201 / 409 Ready</span>
+          </div>
+          <div class="text-blue-400 font-bold">POST /api/registrations</div>
+          <div class="text-slate-400 mt-1">Header: <span class="text-amber-300">X-User-Id: <span id="code-snippet-user">...</span></span></div>
+          <div class="text-slate-400 mt-0.5">Payload: { "event_id": "<span id="code-snippet-id">...</span>" }</div>
+        </div>
+      </div>
+
+      <!-- Drawer Bottom Action CTA -->
+      <div class="p-6 bg-slate-50 border-t border-slate-200 flex flex-col gap-2">
+        <button class="w-full py-4 px-6 rounded-2xl bg-brand-blue hover:bg-blue-700 text-white font-extrabold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-xl shadow-blue-500/25 active:scale-95" id="drawer-action-btn" type="button">
+          <span class="material-symbols-outlined text-[20px]">bolt</span>
+          <span id="drawer-action-btn-text">Confirm 1-Click Registration</span>
+        </button>
+        <span class="text-center text-[11px] font-semibold text-slate-400">Calls POST /api/registrations with active student identity</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MY PASSES MODAL ================= -->
+  <div class="fixed inset-0 z-50 hidden items-center justify-center p-4" id="passes-modal">
+    <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" id="passes-backdrop"></div>
+    <div class="relative bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl z-10 max-h-[85vh] overflow-y-auto border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-orange-50 text-brand-orange flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-xl">confirmation_number</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 leading-tight">My Confirmed Passes</h3>
+            <p class="text-xs text-slate-500 font-medium">Fetched live via <code class="font-mono text-brand-blue">GET /api/me/registrations</code></p>
+          </div>
+        </div>
+        <button class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" id="close-passes-btn" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="space-y-4 pt-5" id="passes-list-container">
+        <div class="p-8 text-center text-slate-400 text-sm">Loading your passes...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ORGANIZER CONSOLE MODAL ================= -->
+  <div class="fixed inset-0 z-50 hidden items-center justify-center p-4" id="organizer-modal">
+    <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" id="organizer-backdrop"></div>
+    <div class="relative bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl z-10 max-h-[90vh] overflow-y-auto border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-purple-50 text-brand-purple flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-xl">shield_person</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 leading-tight">Organizer Attendee Console</h3>
+            <p class="text-xs text-slate-500 font-medium">Protected Endpoint: <code class="font-mono text-purple-700">GET /api/events/{id}/registrations</code></p>
+          </div>
+        </div>
+        <button class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" id="close-organizer-btn" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="pt-5 space-y-5" id="organizer-content-container">
+        <!-- Event selector for organizer -->
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Select Your Event</label>
+          <select class="w-full p-3 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-brand-blue" id="organizer-event-select">
+            <option value="">Loading your owned events...</option>
+          </select>
+        </div>
+
+        <!-- Metrics cards -->
+        <div class="grid grid-cols-3 gap-3">
+          <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+            <span class="text-xs font-bold text-slate-400 uppercase">Attendees</span>
+            <div class="text-xl font-black text-slate-900 mt-0.5" id="org-metric-attendees">-</div>
+          </div>
+          <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+            <span class="text-xs font-bold text-slate-400 uppercase">Capacity</span>
+            <div class="text-xl font-black text-slate-900 mt-0.5" id="org-metric-capacity">-</div>
+          </div>
+          <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+            <span class="text-xs font-bold text-slate-400 uppercase">Remaining</span>
+            <div class="text-xl font-black text-emerald-600 mt-0.5" id="org-metric-remaining">-</div>
+          </div>
+        </div>
+
+        <!-- Attendee Table -->
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="p-3 bg-slate-100 font-bold text-xs text-slate-600 flex justify-between items-center">
+            <span>Attendee Roster</span>
+            <span class="text-[10px] text-slate-400 font-mono">Only owning organizer permitted</span>
+          </div>
+          <div class="max-h-60 overflow-y-auto" id="attendees-table-body">
+            <div class="p-6 text-center text-slate-400 text-xs">Select an event above to view registered attendees.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= API CONTRACT SCHEMA MODAL ================= -->
+  <div class="fixed inset-0 z-50 hidden items-center justify-center p-4" id="schema-modal">
+    <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" id="modal-backdrop"></div>
+    <div class="relative bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl z-10 max-h-[90vh] overflow-y-auto border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-xl">terminal</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 leading-tight">API Contract Specification</h3>
+            <p class="text-xs text-slate-500 font-medium">Standardized endpoints matching workshop specification</p>
+          </div>
+        </div>
+        <button class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" id="close-modal-btn" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Contract Callout Alert -->
+      <div class="mt-4 p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-3 text-amber-900 text-xs font-semibold">
+        <span class="material-symbols-outlined text-amber-600 text-xl">lock</span>
+        <span>Authentication required for registration and private lists. Use <code class="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-300">X-User-Id: &lt;user_id&gt;</code> header.</span>
+      </div>
+
+      <!-- Endpoints Spec Table & Interactive Testers -->
+      <div class="space-y-4 pt-4">
+
+        <!-- Endpoint 1: GET /api/events -->
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">GET</span>
+              <code class="font-mono text-sm font-bold text-slate-800">/api/events</code>
+            </div>
+            <button class="test-api-btn px-3 py-1 rounded-xl bg-brand-blue hover:bg-blue-700 text-white text-xs font-bold transition-colors flex items-center gap-1" data-endpoint="events">
+              <span class="material-symbols-outlined text-[14px]">play_arrow</span> Test Live
+            </button>
+          </div>
+          <p class="text-xs text-slate-600">Browse events catalog with titles, capacities, and organizer IDs.</p>
+          <div class="mt-2 bg-slate-950 p-3 rounded-xl font-mono text-[11px] text-emerald-400 overflow-x-auto max-h-32" id="spec-result-events">
+            Click "Test Live" to inspect live response.
+          </div>
+        </div>
+
+        <!-- Endpoint 2: GET /api/events/{id} -->
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">GET</span>
+              <code class="font-mono text-sm font-bold text-slate-800">/api/events/{id}</code>
+            </div>
+            <button class="test-api-btn px-3 py-1 rounded-xl bg-brand-blue hover:bg-blue-700 text-white text-xs font-bold transition-colors flex items-center gap-1" data-endpoint="event-detail">
+              <span class="material-symbols-outlined text-[14px]">play_arrow</span> Test Live
+            </button>
+          </div>
+          <p class="text-xs text-slate-600">Event details including registered count and seat availability.</p>
+          <div class="mt-2 bg-slate-950 p-3 rounded-xl font-mono text-[11px] text-emerald-400 overflow-x-auto max-h-32" id="spec-result-event-detail">
+            Click "Test Live" to inspect live response.
+          </div>
+        </div>
+
+        <!-- Endpoint 3: POST /api/registrations -->
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-blue-100 text-brand-blue">POST</span>
+              <code class="font-mono text-sm font-bold text-slate-800">/api/registrations</code>
+            </div>
+            <button class="test-api-btn px-3 py-1 rounded-xl bg-brand-blue hover:bg-blue-700 text-white text-xs font-bold transition-colors flex items-center gap-1" data-endpoint="register">
+              <span class="material-symbols-outlined text-[14px]">play_arrow</span> Test Live
+            </button>
+          </div>
+          <p class="text-xs text-slate-600">Create registration. Returns <span class="font-bold text-emerald-600">201 Created</span> on success, or <span class="font-bold text-amber-600">409 Conflict</span> if duplicate or full.</p>
+          <div class="mt-2 bg-slate-950 p-3 rounded-xl font-mono text-[11px] text-blue-300 overflow-x-auto max-h-32" id="spec-result-register">
+            Click "Test Live" to simulate RSVP for active user.
+          </div>
+        </div>
+
+        <!-- Endpoint 4: GET /api/me/registrations -->
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">GET</span>
+              <code class="font-mono text-sm font-bold text-slate-800">/api/me/registrations</code>
+            </div>
+            <button class="test-api-btn px-3 py-1 rounded-xl bg-brand-blue hover:bg-blue-700 text-white text-xs font-bold transition-colors flex items-center gap-1" data-endpoint="my-registrations">
+              <span class="material-symbols-outlined text-[14px]">play_arrow</span> Test Live
+            </button>
+          </div>
+          <p class="text-xs text-slate-600">Current user's registrations. Requires authenticated <code class="font-mono">X-User-Id</code> header.</p>
+          <div class="mt-2 bg-slate-950 p-3 rounded-xl font-mono text-[11px] text-emerald-400 overflow-x-auto max-h-32" id="spec-result-my-registrations">
+            Click "Test Live" to fetch active user passes.
+          </div>
+        </div>
+
+        <!-- Endpoint 5: GET /api/events/{id}/registrations -->
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">GET</span>
+              <code class="font-mono text-sm font-bold text-slate-800">/api/events/{id}/registrations</code>
+            </div>
+            <button class="test-api-btn px-3 py-1 rounded-xl bg-brand-blue hover:bg-blue-700 text-white text-xs font-bold transition-colors flex items-center gap-1" data-endpoint="attendees">
+              <span class="material-symbols-outlined text-[14px]">play_arrow</span> Test Live
+            </button>
+          </div>
+          <p class="text-xs text-slate-600">Attendee list, <span class="font-bold text-amber-700">owning organizer only</span>. Returns 403 Forbidden for non-organizer students.</p>
+          <div class="mt-2 bg-slate-950 p-3 rounded-xl font-mono text-[11px] text-amber-300 overflow-x-auto max-h-32" id="spec-result-attendees">
+            Click "Test Live" to verify permission enforcement.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+        <button class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors" id="dismiss-modal-btn" type="button">
+          Close API Inspector
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FLOATING TOAST SYSTEM ================= -->
+  <div class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none" id="toast-container"></div>
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="w-full bg-slate-900 border-t border-slate-800 mt-auto py-12 text-slate-400">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-brand-orange text-white flex items-center justify-center font-bold">
+          ⚡
+        </div>
+        <div>
+          <span class="text-base font-extrabold text-white">CampusPulse</span>
+          <span class="block text-xs text-slate-400">The Collegiate Social Operating System</span>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-6 text-xs font-semibold">
+        <a class="hover:text-white transition-colors" href="#events-section">Live Events Feed</a>
+        <button class="hover:text-white transition-colors" id="footer-passes-btn" type="button">My Passes</button>
+        <button class="hover:text-white transition-colors" id="footer-api-btn" type="button">API Contract</button>
+      </div>
+    </div>
+    <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
+      <span>© 2026 CampusPulse Network. Connected to live API contract endpoints.</span>
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span id="footer-api-status">All 5 API Endpoints Functional</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= INTERACTIVE ENGINE & LIVE API CLIENT ================= -->
+<script>
+(function() {
+  // ----------------------------------------------------
+  // Configuration & State
+  // ----------------------------------------------------
+  const REMOTE_BASE_URL = 'https://hello-world-workshop.onrender.com';
+  const LOCAL_BASE_URL = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1') 
+    ? '' 
+    : 'http://127.0.0.1:5001';
+
+  let currentTarget = localStorage.getItem('campuspulse_target') || 'render';
+  let activeUser = null;
+  let allEvents = [];
+  let userRegistrations = [];
+  let currentDrawerEventId = null;
+
+  // Visual Assets Lookup
+  const EVENT_COVERS = [
+    'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&auto=format&fit=crop&q=80'
+  ];
+
+  const AVATARS = [
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80'
+  ];
+
+  // Helper to determine URL path based on current target
+  function getApiUrl(endpoint) {
+    const isLocalServer = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1');
+
+    if (currentTarget === 'render') {
+      if (isLocalServer) {
+        // Use transparent proxy from Flask backend to avoid browser CORS restrictions
+        return `/api/remote${endpoint.replace(/^\/api/, '')}`;
+      } else {
+        // Direct call to Render
+        return `${REMOTE_BASE_URL}${endpoint}`;
+      }
+    } else {
+      // Local Flask Backend
+      return `${LOCAL_BASE_URL}${endpoint}`;
+    }
+  }
+
+  // Generic API Fetch Wrapper
+  async function apiRequest(endpoint, options = {}) {
+    const url = getApiUrl(endpoint);
+    const headers = {
+      'Accept': 'application/json',
+      ...(options.headers || {})
+    };
+
+    if (activeUser && activeUser.id) {
+      headers['X-User-Id'] = activeUser.id;
+    }
+
+    if (options.body && typeof options.body === 'object') {
+      headers['Content-Type'] = 'application/json';
+      options.body = JSON.stringify(options.body);
+    }
+
+    try {
+      const response = await fetch(url, { ...options, headers });
+      const data = await response.json().catch(() => ({}));
+      return { ok: response.ok, status: response.status, data };
+    } catch (err) {
+      // Fallback for CORS if fetching directly without local proxy
+      if (currentTarget === 'render' && !window.location.origin.includes('127.0.0.1')) {
+        try {
+          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(REMOTE_BASE_URL + endpoint)}`;
+          const res = await fetch(proxyUrl, { headers: { 'Accept': 'application/json' } });
+          const data = await res.json();
+          return { ok: res.ok, status: res.status, data };
+        } catch (e) {
+          return { ok: false, status: 0, data: { error: `Network/CORS Error: ${err.message}` } };
+        }
+      }
+      return { ok: false, status: 0, data: { error: err.message } };
+    }
+  }
+
+  // ----------------------------------------------------
+  // Toast Notification System
+  // ----------------------------------------------------
+  function triggerToast(title, message, isSuccess = true, icon = 'check_circle', apiBadge = '200 OK') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `p-4 rounded-2xl shadow-2xl backdrop-blur-xl flex items-start gap-3 pointer-events-auto transition-all duration-300 transform translate-y-4 opacity-0 border max-w-md ${
+      isSuccess 
+        ? 'bg-slate-900/95 text-white border-slate-700' 
+        : 'bg-amber-950/95 text-amber-100 border-amber-800'
+    }`;
+
+    toast.innerHTML = `
+      <div class="w-9 h-9 rounded-xl ${isSuccess ? 'bg-emerald-500' : 'bg-brand-orange'} text-white flex items-center justify-center shrink-0 shadow-md">
+        <span class="material-symbols-outlined text-[20px]">${icon}</span>
+      </div>
+      <div class="flex-1 pr-2">
+        <div class="text-xs font-black tracking-wide">${title}</div>
+        <div class="text-xs text-slate-300 font-medium mt-0.5 leading-snug">${message}</div>
+        <div class="font-mono text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full ${isSuccess ? 'bg-emerald-400' : 'bg-amber-400'}"></span>
+          ${apiBadge}
+        </div>
+      </div>
+      <button class="text-slate-400 hover:text-white p-1" onclick="this.parentElement.remove()">
+        <span class="material-symbols-outlined text-[16px]">close</span>
+      </button>
+    `;
+
+    container.appendChild(toast);
+    requestAnimationFrame(() => {
+      toast.classList.remove('translate-y-4', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+    });
+
+    setTimeout(() => {
+      toast.classList.add('opacity-0', 'translate-x-8');
+      setTimeout(() => toast.remove(), 350);
+    }, 4500);
+  }
+
+  // ----------------------------------------------------
+  // Load Users & Initialize Persona
+  // ----------------------------------------------------
+  async function loadUsers() {
+    const res = await apiRequest('/api/users');
+    let users = res.data;
+
+    if (!Array.isArray(users) || users.length === 0) {
+      users = [
+        { id: '1ef5ae1f-b030-4236-823b-2bd1f95ea0d7', email: 'violin@gmail.com', role: 'Organizer' },
+        { id: '2249e32c-3ce8-4947-afdc-ecbc0db26fe8', email: 'violin2@gmail.com', role: 'Student' },
+        { id: 'cde82991-ce09-45ce-97bd-c91e475cc131', email: 'violin1@gmail.com', role: 'Student' }
+      ];
+    }
+
+    const listContainer = document.getElementById('user-dropdown-list');
+    listContainer.innerHTML = '';
+
+    const savedUserId = localStorage.getItem('campuspulse_active_user_id');
+    const matchedUser = users.find(u => u.id === savedUserId) || users[0];
+    setActiveUser(matchedUser);
+
+    users.forEach((u, idx) => {
+      const isOrg = (u.role || '').toLowerCase().includes('organi');
+      const avatar = AVATARS[idx % AVATARS.length];
+      const isSelected = activeUser && activeUser.id === u.id;
+
+      const btn = document.createElement('button');
+      btn.className = `persona-option w-full p-2.5 rounded-xl flex items-center justify-between transition-colors text-left ${
+        isSelected ? 'bg-blue-50 text-slate-900 border border-blue-200' : 'hover:bg-slate-100 text-slate-800'
+      }`;
+      btn.type = 'button';
+      btn.innerHTML = `
+        <div class="flex items-center gap-3">
+          <img alt="${u.email}" class="w-8 h-8 rounded-lg object-cover" src="${avatar}"/>
+          <div>
+            <div class="text-xs font-bold text-slate-900">${u.email}</div>
+            <div class="text-[10px] text-slate-500 font-mono">${u.id.substring(0, 8)}...</div>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${
+          isOrg ? 'bg-orange-100 text-brand-orange' : 'bg-blue-100 text-brand-blue'
+        }">${u.role || 'Student'}</span>
+      `;
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setActiveUser(u);
+        document.getElementById('user-dropdown-menu').classList.add('hidden');
+        document.getElementById('user-chevron').classList.remove('rotate-180');
+        triggerToast(
+          `Persona Switched: ${u.email}`,
+          `Active Identity role: ${u.role}. Sent via X-User-Id header.`,
+          true,
+          'switch_account',
+          `X-User-Id: ${u.id.substring(0, 8)}...`
+        );
+        fetchMyRegistrations();
+        loadEvents();
+      });
+
+      listContainer.appendChild(btn);
+    });
+  }
+
+  function setActiveUser(user) {
+    activeUser = user;
+    localStorage.setItem('campuspulse_active_user_id', user.id);
+
+    const nameEl = document.getElementById('active-user-name');
+    const handleEl = document.getElementById('active-user-handle');
+    const badgeEl = document.getElementById('active-user-badge');
+    const avatarEl = document.getElementById('active-user-avatar');
+    const heroStatus = document.getElementById('hero-user-status-text');
+
+    const emailName = user.email.split('@')[0];
+    const isOrg = (user.role || '').toLowerCase().includes('organi');
+
+    nameEl.innerText = emailName;
+    handleEl.innerText = user.email;
+    badgeEl.innerText = isOrg ? 'Organizer' : 'Student';
+    badgeEl.className = `px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+      isOrg ? 'bg-orange-100 text-brand-orange' : 'bg-blue-100 text-brand-blue'
+    }`;
+    avatarEl.src = AVATARS[Math.abs(user.id.charCodeAt(0)) % AVATARS.length];
+    heroStatus.innerText = `1-Click RSVP Ready for ${emailName}`;
+
+    document.getElementById('code-snippet-user').innerText = user.id.substring(0, 8) + '...';
+  }
+
+  // ----------------------------------------------------
+  // Fetch Current User's Passes (GET /api/me/registrations)
+  // ----------------------------------------------------
+  async function fetchMyRegistrations() {
+    if (!activeUser) return;
+    const res = await apiRequest('/api/me/registrations');
+    if (res.ok && Array.isArray(res.data)) {
+      userRegistrations = res.data;
+      const countEl = document.getElementById('my-passes-count');
+      if (countEl) countEl.innerText = userRegistrations.length;
+    }
+  }
+
+  // Persistent registration counts store (across page reloads & persona switches)
+  function getStoredEventCounts() {
+    try {
+      return JSON.parse(localStorage.getItem('campuspulse_event_counts') || '{}');
+    } catch {
+      return {};
+    }
+  }
+
+  function setStoredEventCount(eventId, count) {
+    try {
+      const counts = getStoredEventCounts();
+      counts[eventId] = count;
+      localStorage.setItem('campuspulse_event_counts', JSON.stringify(counts));
+    } catch {}
+  }
+
+  // ----------------------------------------------------
+  // Load Events Catalog (GET /api/events)
+  // ----------------------------------------------------
+  async function loadEvents() {
+    const grid = document.getElementById('events-grid');
+    const countEl = document.getElementById('results-count');
+    const heroCount = document.getElementById('hero-events-live-count');
+    const refreshIcon = document.getElementById('refresh-icon');
+
+    refreshIcon.classList.add('animate-spin');
+
+    const res = await apiRequest('/api/events');
+    refreshIcon.classList.remove('animate-spin');
+
+    if (!res.ok || !Array.isArray(res.data)) {
+      grid.innerHTML = `
+        <div class="col-span-full py-16 text-center">
+          <div class="inline-flex p-4 rounded-3xl bg-red-50 text-red-500 mb-3">
+            <span class="material-symbols-outlined text-3xl">error</span>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800">Unable to load events</h3>
+          <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">${res.data?.error || 'Check network connection or target backend.'}</p>
+          <button class="mt-4 px-4 py-2 rounded-xl bg-brand-blue text-white font-bold text-xs" onclick="location.reload()">Retry Fetch</button>
+        </div>
+      `;
+      return;
+    }
+
+    const storedCounts = getStoredEventCounts();
+    const myRegisteredEventIds = new Set(userRegistrations.map(r => r.event_id));
+
+    allEvents = res.data.map(ev => {
+      const cap = Number(ev.capacity) || 50;
+      
+      // Determine registered count:
+      // 1. Backend returned registered_count
+      // 2. Stored in persistent localStorage
+      // 3. User passes check
+      let reg = 0;
+      if (typeof ev.registered_count === 'number' && ev.registered_count > 0) {
+        reg = ev.registered_count;
+      } else if (typeof storedCounts[ev.id] === 'number') {
+        reg = storedCounts[ev.id];
+      }
+      
+      if (myRegisteredEventIds.has(ev.id) && reg === 0) {
+        reg = 1;
+      }
+
+      if (reg > 0) {
+        storedCounts[ev.id] = reg;
+      }
+
+      const spotsRemaining = Math.max(0, cap - reg);
+
+      return {
+        ...ev,
+        capacity: cap,
+        registered_count: reg,
+        spots_remaining: spotsRemaining
+      };
+    });
+
+    try {
+      localStorage.setItem('campuspulse_event_counts', JSON.stringify(storedCounts));
+    } catch {}
+
+    countEl.innerText = `${allEvents.length} events live`;
+    heroCount.innerText = `${allEvents.length} Campus Events Live This Week`;
+
+    renderEventsGrid(allEvents);
+  }
+
+  function getCategoryForEvent(title) {
+    const t = (title || '').toLowerCase();
+    if (t.includes('hackathon') || t.includes('coding') || t.includes('python') || t.includes('agent') || t.includes('ai') || t.includes('api')) return 'Tech';
+    if (t.includes('music') || t.includes('jam') || t.includes('electronic') || t.includes('acoustic') || t.includes('frequencies') || t.includes('resonance')) return 'Music';
+    if (t.includes('maker') || t.includes('design') || t.includes('studio') || t.includes('stories')) return 'Creative';
+    return 'Community';
+  }
+
+  function renderEventsGrid(events) {
+    const grid = document.getElementById('events-grid');
+    grid.innerHTML = '';
+
+    if (events.length === 0) {
+      grid.innerHTML = `
+        <div class="col-span-full py-16 text-center text-slate-400">
+          <span class="material-symbols-outlined text-4xl mb-2">event_busy</span>
+          <p class="text-sm font-semibold">No events matching your filters.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const myRegisteredEventIds = new Set(userRegistrations.map(r => r.event_id));
+
+    events.forEach((ev, idx) => {
+      const coverImg = EVENT_COVERS[idx % EVENT_COVERS.length];
+      const category = getCategoryForEvent(ev.title);
+      const isRegistered = myRegisteredEventIds.has(ev.id);
+      const capacity = ev.capacity || 50;
+      const registeredCount = typeof ev.registered_count === 'number' ? ev.registered_count : 0;
+      const spotsLeft = typeof ev.spots_remaining === 'number' ? ev.spots_remaining : Math.max(0, capacity - registeredCount);
+      const progressPct = Math.min(100, Math.round((registeredCount / capacity) * 100));
+
+      // Format date
+      let dateMonth = 'NOV';
+      let dateDay = String(10 + (idx % 18));
+      let dateString = `${dateMonth} ${dateDay}, 2026 • 04:00 PM`;
+
+      if (ev.timestamp) {
+        const d = new Date(ev.timestamp);
+        if (!isNaN(d.getTime())) {
+          dateMonth = d.toLocaleString(undefined, { month: 'short' }).toUpperCase();
+          dateDay = d.getDate();
+          dateString = d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        }
+      }
+
+      const card = document.createElement('article');
+      card.className = "event-card group bg-white rounded-3xl border border-slate-200/80 hover:border-brand-blue/50 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col justify-between overflow-hidden";
+      card.setAttribute('data-id', ev.id);
+      card.setAttribute('data-category', category);
+
+      card.innerHTML = `
+        <div>
+          <!-- Image & Poster Area -->
+          <div class="relative h-48 w-full overflow-hidden bg-slate-900">
+            <img alt="${ev.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="${coverImg}"/>
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+            
+            <!-- Date Badge -->
+            <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-2xl text-center shadow-lg border border-white/60">
+              <span class="block text-[11px] font-black uppercase tracking-wider text-brand-orange leading-none">${dateMonth}</span>
+              <span class="block text-2xl font-black text-slate-900 leading-tight">${dateDay}</span>
+            </div>
+
+            <!-- Status Pill -->
+            <div class="absolute top-4 right-4 flex flex-col items-end gap-1.5">
+              <span class="inline-flex items-center gap-1.5 ${isRegistered ? 'bg-emerald-600' : 'bg-emerald-500'} text-white font-extrabold text-[11px] px-3 py-1 rounded-full shadow-lg">
+                <span class="w-2 h-2 rounded-full bg-white ${isRegistered ? '' : 'animate-pulse'}"></span>
+                ${isRegistered ? 'REGISTERED' : 'RSVP OPEN'}
+              </span>
+            </div>
+
+            <!-- Category Sub-badge -->
+            <div class="absolute bottom-3 left-4 flex items-center gap-2">
+              <span class="bg-brand-blue/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-0.5 rounded-lg shadow-sm">
+                ${category}
+              </span>
+              <span class="text-white/80 text-xs font-semibold">• ${capacity} Capacity</span>
+            </div>
+          </div>
+
+          <!-- Content Body -->
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-brand-orange text-sm">hub</span>
+                <span class="text-xs font-bold text-slate-700">Organized Event</span>
+              </div>
+              <span class="font-mono text-[10px] font-semibold text-slate-400">ID: ${ev.id.substring(0, 8)}</span>
+            </div>
+
+            <h3 class="text-xl font-bold text-slate-900 group-hover:text-brand-blue transition-colors cursor-pointer card-title-trigger leading-snug">
+              ${ev.title}
+            </h3>
+
+            <!-- Live Capacity Progress Bar & Metrics -->
+            <div class="mt-4 bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+              <div class="flex justify-between items-center text-xs mb-1.5">
+                <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[15px] text-brand-blue">groups</span>
+                  <span class="font-mono font-black text-slate-900" id="card-capacity-${ev.id}">${registeredCount} / ${capacity}</span>
+                  <span class="text-slate-400 font-medium">Seats</span>
+                </span>
+                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-full ${spotsLeft <= 5 ? 'bg-orange-100 text-brand-orange' : 'bg-emerald-100 text-emerald-800'}" id="card-remaining-${ev.id}">
+                  ${spotsLeft > 0 ? spotsLeft + ' spots left' : 'Capacity Full'}
+                </span>
+              </div>
+              <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                <div class="bg-gradient-to-r from-brand-blue to-brand-orange h-full rounded-full transition-all duration-500" id="card-progress-${ev.id}" style="width: ${progressPct}%"></div>
+              </div>
+            </div>
+
+            <div class="mt-4 flex items-center gap-2 text-xs text-slate-500 font-semibold">
+              <span class="material-symbols-outlined text-[16px] text-slate-400">calendar_today</span>
+              <span>${dateString}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer / RSVP Action -->
+        <div class="p-6 pt-0 flex items-center gap-2">
+          <button class="rsvp-btn flex-1 py-3 px-4 rounded-2xl ${
+            isRegistered 
+              ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20' 
+              : 'bg-brand-blue hover:bg-blue-700 text-white shadow-blue-500/20'
+          } font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-lg active:scale-95" data-id="${ev.id}">
+            <span class="material-symbols-outlined text-[18px]">${isRegistered ? 'verified' : 'bolt'}</span>
+            <span>${isRegistered ? 'Pass Confirmed' : '1-Click RSVP'}</span>
+          </button>
+          
+          <button class="details-btn p-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors" data-id="${ev.id}" title="View Details and Attendee Roster">
+            <span class="material-symbols-outlined text-[18px]">info</span>
+          </button>
+        </div>
+      `;
+
+      // Attach RSVP Click
+      card.querySelector('.rsvp-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleRegistration(ev.id, card.querySelector('.rsvp-btn'));
+      });
+
+      // Attach Details Click
+      card.querySelector('.details-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        openDrawer(ev.id);
+      });
+      card.querySelector('.card-title-trigger').addEventListener('click', (e) => {
+        e.stopPropagation();
+        openDrawer(ev.id);
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  // ----------------------------------------------------
+  // Perform Registration (POST /api/registrations)
+  // ----------------------------------------------------
+  async function handleRegistration(eventId, buttonElement) {
+    if (!activeUser || !activeUser.id) {
+      triggerToast('Authentication Required', 'Please select a persona from the dropdown to authenticate with X-User-Id.', false, 'lock', '401 UNAUTHORIZED');
+      return;
+    }
+
+    const eventData = allEvents.find(e => e.id === eventId);
+    if (!eventData) return;
+
+    buttonElement.disabled = true;
+    const originalText = buttonElement.innerHTML;
+    buttonElement.innerHTML = `
+      <span class="material-symbols-outlined animate-spin text-[18px]">sync</span>
+      <span>Allocating Pass...</span>
+    `;
+
+    const res = await apiRequest('/api/registrations', {
+      method: 'POST',
+      body: { event_id: eventId }
+    });
+
+    buttonElement.disabled = false;
+
+    if (res.status === 201) {
+      // 1. Calculate updated capacity metrics
+      const cap = Number(eventData.capacity) || 50;
+      const currentReg = typeof eventData.registered_count === 'number' ? eventData.registered_count : 0;
+      const newRegCount = currentReg + 1;
+      const newSpotsLeft = Math.max(0, cap - newRegCount);
+      const newPct = Math.min(100, Math.round((newRegCount / cap) * 100));
+
+      eventData.registered_count = newRegCount;
+      eventData.spots_remaining = newSpotsLeft;
+      setStoredEventCount(eventId, newRegCount);
+
+      // 2. Update Card UI in DOM
+      const cardCap = document.getElementById(`card-capacity-${eventId}`);
+      const cardRem = document.getElementById(`card-remaining-${eventId}`);
+      const cardProg = document.getElementById(`card-progress-${eventId}`);
+      
+      if (cardCap) cardCap.innerText = `${newRegCount} / ${cap}`;
+      if (cardRem) {
+        cardRem.innerText = newSpotsLeft > 0 ? `${newSpotsLeft} spots left` : 'Capacity Full';
+        cardRem.className = `text-[11px] font-extrabold px-2 py-0.5 rounded-full ${newSpotsLeft <= 5 ? 'bg-orange-100 text-brand-orange' : 'bg-emerald-100 text-emerald-800'}`;
+      }
+      if (cardProg) cardProg.style.width = `${newPct}%`;
+
+      // 3. Update Drawer UI if open
+      const drawerCap = document.getElementById('drawer-capacity-text');
+      const drawerRem = document.getElementById('drawer-remaining-spots');
+      const drawerProg = document.getElementById('drawer-progress');
+
+      if (drawerCap) drawerCap.innerText = `${newRegCount} / ${cap} Registered`;
+      if (drawerRem) drawerRem.innerText = newSpotsLeft > 0 ? `${newSpotsLeft} Spots Remaining` : 'Capacity Reached';
+      if (drawerProg) drawerProg.style.width = `${newPct}%`;
+
+      // 4. Update Button State
+      buttonElement.classList.remove('bg-brand-blue', 'hover:bg-blue-700');
+      buttonElement.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'text-white');
+      buttonElement.innerHTML = `
+        <span class="material-symbols-outlined text-[18px]">verified</span>
+        <span>🎉 Registered!</span>
+      `;
+
+      // 5. Update Card Top-Right Status Badge
+      const card = buttonElement.closest('article') || document.querySelector(`.event-card[data-id="${eventId}"]`);
+      if (card) {
+        const topPill = card.querySelector('.absolute.top-4.right-4 span');
+        if (topPill) {
+          topPill.className = "inline-flex items-center gap-1.5 bg-emerald-600 text-white font-extrabold text-[11px] px-3 py-1 rounded-full shadow-lg";
+          topPill.innerHTML = '<span class="w-2 h-2 rounded-full bg-white"></span> REGISTERED';
+        }
+      }
+
+      triggerToast(
+        '🎉 Pass Confirmed!',
+        `Seat allocated! Capacity updated: ${newRegCount}/${cap} seats (${newSpotsLeft} spots remaining).`,
+        true,
+        'celebration',
+        'POST /api/registrations • 201 CREATED'
+      );
+
+      await fetchMyRegistrations();
+    } else if (res.status === 409) {
+      buttonElement.innerHTML = originalText;
+      triggerToast(
+        'Registration Notice',
+        res.data?.error || 'Already registered or event at capacity.',
+        false,
+        'info',
+        'POST /api/registrations • 409 CONFLICT'
+      );
+    } else {
+      buttonElement.innerHTML = originalText;
+      triggerToast(
+        'Registration Failed',
+        res.data?.error || 'Could not complete registration.',
+        false,
+        'error',
+        `HTTP ${res.status}`
+      );
+    }
+  }
+
+  // ----------------------------------------------------
+  // Event Details Drawer (GET /api/events/{id})
+  // ----------------------------------------------------
+  async function openDrawer(eventId) {
+    currentDrawerEventId = eventId;
+    const drawer = document.getElementById('event-drawer');
+    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    const drawerPanel = document.getElementById('drawer-panel');
+
+    const eventData = allEvents.find(e => e.id === eventId) || {};
+    const res = await apiRequest(`/api/events/${encodeURIComponent(eventId)}`);
+    const data = res.ok ? res.data : eventData;
+
+    const organizerId = data.organiser_id || data.organizer_id || eventData.organiser_id || eventData.organizer_id;
+    const isOwningOrganizer = activeUser && organizerId === activeUser.id;
+
+    document.getElementById('drawer-event-id').innerText = data.id || eventId;
+    document.getElementById('drawer-title').innerText = data.title || eventData.title;
+    document.getElementById('drawer-host').innerText = `Organized by ID: ${organizerId ? organizerId.substring(0, 12) + '...' : 'Campus Host'}`;
+    document.getElementById('code-snippet-id').innerText = data.id || eventId;
+    document.getElementById('code-snippet-user').innerText = activeUser ? activeUser.id.substring(0, 8) + '...' : 'none';
+
+    const capacity = Number(data.capacity || eventData.capacity) || 50;
+    const storedCounts = getStoredEventCounts();
+    let registeredCount = 0;
+    if (typeof data.registered_count === 'number' && data.registered_count > 0) {
+      registeredCount = data.registered_count;
+    } else if (typeof eventData.registered_count === 'number' && eventData.registered_count > 0) {
+      registeredCount = eventData.registered_count;
+    } else if (typeof storedCounts[eventId] === 'number') {
+      registeredCount = storedCounts[eventId];
+    } else if (userRegistrations.some(r => r.event_id === eventId)) {
+      registeredCount = 1;
+    }
+
+    const spotsLeft = Math.max(0, capacity - registeredCount);
+    const pct = Math.min(100, Math.round((registeredCount / capacity) * 100));
+
+    document.getElementById('drawer-capacity-text').innerText = `${registeredCount} / ${capacity} Registered`;
+    document.getElementById('drawer-progress').style.width = `${pct}%`;
+    document.getElementById('drawer-remaining-spots').innerText = spotsLeft > 0 ? `${spotsLeft} Spots Remaining` : 'Capacity Reached';
+
+    // Show organizer console button if this is the owning organizer
+    const orgActions = document.getElementById('drawer-organizer-actions');
+    if (isOwningOrganizer) {
+      orgActions.classList.remove('hidden');
+      document.getElementById('drawer-view-attendees-btn').onclick = () => {
+        closeDrawer();
+        openOrganizerModal(data.id);
+      };
+    } else {
+      orgActions.classList.add('hidden');
+    }
+
+    // Check if already registered
+    const isRegistered = userRegistrations.some(r => r.event_id === eventId);
+    const actionText = document.getElementById('drawer-action-btn-text');
+    actionText.innerText = isRegistered ? 'Already Holding Pass (Click to Re-confirm)' : `Register ${activeUser ? activeUser.email.split('@')[0] : 'Now'} (1-Click)`;
+
+    drawer.classList.remove('pointer-events-none');
+    drawerBackdrop.classList.remove('pointer-events-none', 'opacity-0');
+    drawerBackdrop.classList.add('opacity-100');
+    drawerPanel.classList.remove('translate-x-full');
+  }
+
+  function closeDrawer() {
+    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    const drawerPanel = document.getElementById('drawer-panel');
+    drawerBackdrop.classList.remove('opacity-100');
+    drawerBackdrop.classList.add('opacity-0');
+    drawerPanel.classList.add('translate-x-full');
+    setTimeout(() => {
+      document.getElementById('event-drawer').classList.add('pointer-events-none');
+    }, 300);
+  }
+
+  document.getElementById('close-drawer-btn').addEventListener('click', closeDrawer);
+  document.getElementById('drawer-backdrop').addEventListener('click', closeDrawer);
+  document.getElementById('drawer-action-btn').addEventListener('click', () => {
+    if (currentDrawerEventId) {
+      const cardBtn = document.querySelector(`.rsvp-btn[data-id="${currentDrawerEventId}"]`);
+      handleRegistration(currentDrawerEventId, cardBtn || document.getElementById('drawer-action-btn'));
+    }
+  });
+
+  // ----------------------------------------------------
+  // "My Passes" View Modal
+  // ----------------------------------------------------
+  async function openPassesModal() {
+    const modal = document.getElementById('passes-modal');
+    const container = document.getElementById('passes-list-container');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    container.innerHTML = '<div class="p-8 text-center text-slate-400 text-sm">Fetching your passes from GET /api/me/registrations...</div>';
+
+    await fetchMyRegistrations();
+
+    if (userRegistrations.length === 0) {
+      container.innerHTML = `
+        <div class="p-8 text-center">
+          <span class="material-symbols-outlined text-4xl text-slate-300">confirmation_number</span>
+          <h4 class="text-base font-bold text-slate-800 mt-2">No Passes Yet</h4>
+          <p class="text-xs text-slate-500 mt-1">You haven’t registered for any events with this persona (${activeUser.email}).</p>
+          <button class="mt-4 px-4 py-2 rounded-xl bg-brand-blue text-white font-bold text-xs" onclick="document.getElementById('close-passes-btn').click()">
+            Explore Events Now →
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = '';
+    const eventMap = new Map(allEvents.map(e => [e.id, e]));
+
+    userRegistrations.forEach((reg, i) => {
+      const ev = eventMap.get(reg.event_id) || { title: `Event ${reg.event_id.substring(0, 8)}`, capacity: 50 };
+      const ticket = document.createElement('div');
+      ticket.className = "p-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 flex items-center justify-between gap-4";
+      ticket.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-brand-blue text-white flex items-center justify-center font-bold text-lg shadow-md shadow-blue-500/20">
+            🎟
+          </div>
+          <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-brand-blue">Pass Confirmed</div>
+            <h4 class="text-sm font-extrabold text-slate-900 leading-tight">${ev.title}</h4>
+            <div class="font-mono text-[10px] text-slate-500 mt-0.5">Reg ID: ${reg.id}</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">ACTIVE PASS</span>
+        </div>
+      `;
+      container.appendChild(ticket);
+    });
+  }
+
+  document.getElementById('nav-passes-btn').addEventListener('click', openPassesModal);
+  document.getElementById('footer-passes-btn').addEventListener('click', openPassesModal);
+  document.getElementById('close-passes-btn').addEventListener('click', () => {
+    document.getElementById('passes-modal').classList.add('hidden');
+    document.getElementById('passes-modal').classList.remove('flex');
+  });
+  document.getElementById('passes-backdrop').addEventListener('click', () => {
+    document.getElementById('passes-modal').classList.add('hidden');
+    document.getElementById('passes-modal').classList.remove('flex');
+  });
+
+  // ----------------------------------------------------
+  // "Organizer Console" Modal (GET /api/events/{id}/registrations)
+  // ----------------------------------------------------
+  async function openOrganizerModal(selectedEventId = null) {
+    const modal = document.getElementById('organizer-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    const select = document.getElementById('organizer-event-select');
+    select.innerHTML = '';
+
+    const isOrg = activeUser && (activeUser.role || '').toLowerCase().includes('organi');
+    
+    // Filter events owned by active user
+    const ownedEvents = allEvents.filter(e => (e.organiser_id || e.organizer_id) === activeUser.id);
+
+    if (!isOrg && ownedEvents.length === 0) {
+      document.getElementById('attendees-table-body').innerHTML = `
+        <div class="p-6 text-center text-amber-800 bg-amber-50">
+          <span class="material-symbols-outlined text-3xl mb-1">lock</span>
+          <div class="font-bold text-sm">Organizer Access Required (403 Forbidden)</div>
+          <p class="text-xs mt-1">Current persona (${activeUser.email}) is not an organizer. Switch to an Organizer persona using the top-right menu to manage attendee rosters.</p>
+        </div>
+      `;
+      document.getElementById('org-metric-attendees').innerText = '0';
+      document.getElementById('org-metric-capacity').innerText = '0';
+      document.getElementById('org-metric-remaining').innerText = '0';
+      return;
+    }
+
+    const eventsToDisplay = ownedEvents.length > 0 ? ownedEvents : allEvents;
+
+    eventsToDisplay.forEach(ev => {
+      const opt = document.createElement('option');
+      opt.value = ev.id;
+      opt.innerText = `${ev.title} (ID: ${ev.id.substring(0, 8)})`;
+      if (selectedEventId && ev.id === selectedEventId) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    const activeEid = select.value || (eventsToDisplay[0] ? eventsToDisplay[0].id : null);
+    if (activeEid) loadAttendeesForEvent(activeEid);
+
+    select.onchange = () => loadAttendeesForEvent(select.value);
+  }
+
+  async function loadAttendeesForEvent(eventId) {
+    const tableBody = document.getElementById('attendees-table-body');
+    tableBody.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">Querying GET /api/events/{id}/registrations...</div>';
+
+    const ev = allEvents.find(e => e.id === eventId) || { capacity: 50 };
+    const res = await apiRequest(`/api/events/${encodeURIComponent(eventId)}/registrations`);
+
+    if (res.status === 403) {
+      tableBody.innerHTML = `
+        <div class="p-4 bg-red-50 text-red-700 text-xs font-semibold">
+          ⛔ 403 Forbidden: ${res.data?.error || 'Only the owning organiser can view attendees.'}
+        </div>
+      `;
+      document.getElementById('org-metric-attendees').innerText = '-';
+      document.getElementById('org-metric-capacity').innerText = String(ev.capacity || '-');
+      document.getElementById('org-metric-remaining').innerText = '-';
+      return;
+    }
+
+    if (!res.ok || !Array.isArray(res.data)) {
+      tableBody.innerHTML = `<div class="p-4 text-xs text-slate-500">${res.data?.error || 'Error loading roster.'}</div>`;
+      return;
+    }
+
+    const attendees = res.data;
+    document.getElementById('org-metric-attendees').innerText = attendees.length;
+    document.getElementById('org-metric-capacity').innerText = ev.capacity || 50;
+    document.getElementById('org-metric-remaining').innerText = Math.max(0, (ev.capacity || 50) - attendees.length);
+
+    if (attendees.length === 0) {
+      tableBody.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">No registrations for this event yet.</div>';
+      return;
+    }
+
+    let rowsHtml = '<table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-500 border-b border-slate-200"><tr><th class="p-2.5">User ID</th><th class="p-2.5">Registration ID</th><th class="p-2.5">Status</th></tr></thead><tbody>';
+    attendees.forEach(att => {
+      rowsHtml += `
+        <tr class="border-b border-slate-100 hover:bg-slate-50">
+          <td class="p-2.5 font-mono text-slate-800">${att.user_id}</td>
+          <td class="p-2.5 font-mono text-slate-500">${att.id}</td>
+          <td class="p-2.5"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">CONFIRMED</span></td>
+        </tr>
+      `;
+    });
+    rowsHtml += '</tbody></table>';
+    tableBody.innerHTML = rowsHtml;
+  }
+
+  document.getElementById('nav-organizer-btn').addEventListener('click', () => openOrganizerModal());
+  document.getElementById('close-organizer-btn').addEventListener('click', () => {
+    document.getElementById('organizer-modal').classList.add('hidden');
+    document.getElementById('organizer-modal').classList.remove('flex');
+  });
+  document.getElementById('organizer-backdrop').addEventListener('click', () => {
+    document.getElementById('organizer-modal').classList.add('hidden');
+    document.getElementById('organizer-modal').classList.remove('flex');
+  });
+
+  // ----------------------------------------------------
+  // API Contract Schema Modal & Live Interactive Testing
+  // ----------------------------------------------------
+  const schemaModal = document.getElementById('schema-modal');
+  function openSchemaModal() {
+    schemaModal.classList.remove('hidden');
+    schemaModal.classList.add('flex');
+  }
+  function closeSchemaModal() {
+    schemaModal.classList.add('hidden');
+    schemaModal.classList.remove('flex');
+  }
+
+  document.getElementById('view-schema-btn').addEventListener('click', openSchemaModal);
+  document.getElementById('view-schema-btn-header').addEventListener('click', openSchemaModal);
+  document.getElementById('footer-api-btn').addEventListener('click', openSchemaModal);
+  document.getElementById('close-modal-btn').addEventListener('click', closeSchemaModal);
+  document.getElementById('dismiss-modal-btn').addEventListener('click', closeSchemaModal);
+  document.getElementById('modal-backdrop').addEventListener('click', closeSchemaModal);
+
+  // Live Tester Inside Modal
+  document.querySelectorAll('.test-api-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const ep = this.getAttribute('data-endpoint');
+      const sampleEvent = allEvents[0] || { id: 'sample-event-id' };
+      let url = '';
+      let options = {};
+      let resultBox = null;
+
+      if (ep === 'events') {
+        url = '/api/events?limit=2';
+        resultBox = document.getElementById('spec-result-events');
+      } else if (ep === 'event-detail') {
+        url = `/api/events/${encodeURIComponent(sampleEvent.id)}`;
+        resultBox = document.getElementById('spec-result-event-detail');
+      } else if (ep === 'register') {
+        url = '/api/registrations';
+        options = { method: 'POST', body: { event_id: sampleEvent.id } };
+        resultBox = document.getElementById('spec-result-register');
+      } else if (ep === 'my-registrations') {
+        url = '/api/me/registrations';
+        resultBox = document.getElementById('spec-result-my-registrations');
+      } else if (ep === 'attendees') {
+        url = `/api/events/${encodeURIComponent(sampleEvent.id)}/registrations`;
+        resultBox = document.getElementById('spec-result-attendees');
+      }
+
+      resultBox.innerText = `Calling ${options.method || 'GET'} ${url}...`;
+      const res = await apiRequest(url, options);
+      resultBox.innerText = `HTTP ${res.status}\n` + JSON.stringify(res.data, null, 2);
+    });
+  });
+
+  // ----------------------------------------------------
+  // Search & Filtering
+  // ----------------------------------------------------
+  const searchInput = document.getElementById('event-search-input');
+  const capacitySelect = document.getElementById('capacity-filter-select');
+  const categoryChips = document.querySelectorAll('.category-chip');
+  let currentCategory = 'all';
+
+  function applyFilters() {
+    const q = searchInput.value.toLowerCase().trim();
+    const capFilter = capacitySelect.value;
+
+    const filtered = allEvents.filter(ev => {
+      const matchQuery = !q || (ev.title || '').toLowerCase().includes(q) || (ev.id || '').toLowerCase().includes(q);
+      const cat = getCategoryForEvent(ev.title);
+      const matchCat = (currentCategory === 'all') || (cat.toLowerCase() === currentCategory.toLowerCase());
+
+      const capacity = ev.capacity || 50;
+      let matchCap = true;
+      if (capFilter === 'open') matchCap = capacity >= 30;
+      else if (capFilter === 'almost-full') matchCap = capacity < 30 && capacity >= 10;
+      else if (capFilter === 'full') matchCap = capacity < 10;
+
+      return matchQuery && matchCat && matchCap;
+    });
+
+    renderEventsGrid(filtered);
+    document.getElementById('results-count').innerText = `${filtered.length} events live`;
+  }
+
+  searchInput.addEventListener('input', applyFilters);
+  capacitySelect.addEventListener('change', applyFilters);
+  categoryChips.forEach(chip => {
+    chip.addEventListener('click', function() {
+      categoryChips.forEach(c => {
+        c.classList.remove('bg-brand-blue', 'text-white', 'shadow-md', 'shadow-blue-500/20');
+        c.classList.add('bg-slate-100', 'text-slate-700');
+      });
+      this.classList.remove('bg-slate-100', 'text-slate-700');
+      this.classList.add('bg-brand-blue', 'text-white', 'shadow-md', 'shadow-blue-500/20');
+      currentCategory = this.getAttribute('data-category');
+      applyFilters();
+    });
+  });
+
+  // ----------------------------------------------------
+  // Base URL Selector
+  // ----------------------------------------------------
+  const apiSelect = document.getElementById('api-base-select');
+  if (apiSelect) {
+    apiSelect.value = currentTarget;
+    apiSelect.addEventListener('change', function() {
+      currentTarget = this.value;
+      localStorage.setItem('campuspulse_target', currentTarget);
+      document.getElementById('hero-current-base-text').innerText = currentTarget === 'render' ? 'Render Live API' : 'Local Flask API';
+      triggerToast(
+        'API Target Switched',
+        currentTarget === 'render' ? 'Now querying live Render API backend.' : 'Now querying local Flask Supabase backend.',
+        true,
+        'dns',
+        currentTarget === 'render' ? REMOTE_BASE_URL : 'http://127.0.0.1:5001'
+      );
+      loadUsers().then(() => {
+        fetchMyRegistrations();
+        loadEvents();
+      });
+    });
+  }
+
+  // ----------------------------------------------------
+  // Dropdown Controls
+  // ----------------------------------------------------
+  const userMenuBtn = document.getElementById('user-menu-btn');
+  const userDropdown = document.getElementById('user-dropdown-menu');
+  const userChevron = document.getElementById('user-chevron');
+
+  userMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isHidden = userDropdown.classList.contains('hidden');
+    if (isHidden) {
+      userDropdown.classList.remove('hidden');
+      userChevron.classList.add('rotate-180');
+    } else {
+      userDropdown.classList.add('hidden');
+      userChevron.classList.remove('rotate-180');
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('user-switcher-container').contains(e.target)) {
+      userDropdown.classList.add('hidden');
+      userChevron.classList.remove('rotate-180');
+    }
+  });
+
+  document.getElementById('refresh-events-btn').addEventListener('click', loadEvents);
+
+  // ----------------------------------------------------
+  // Kickstart Application
+  // ----------------------------------------------------
+  loadUsers().then(() => {
+    fetchMyRegistrations();
+    loadEvents();
+  });
+
+})();
+</script>
+
+</body>
+</html>
